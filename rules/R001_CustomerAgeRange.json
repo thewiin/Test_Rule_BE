@@ -1,9 +1,0 @@
-{
-  "rule_id": "R001_CustomerAgeRange",
-  "rule_name": "KiemTraTuoiKhachHang",
-  "rule_type": "VALUE_RANGE",
-  "description": "Kiểm tra tuổi khách hàng phải từ 18 đến 65",
-  "pointer": "customer_data.customers.age",
-  "min_value": 18,
-  "max_value": 65
-}
