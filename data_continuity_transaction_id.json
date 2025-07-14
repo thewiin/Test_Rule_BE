@@ -1,0 +1,11 @@
+{
+  "rule_id": "R003_TransactionIDGap",
+  "rule_name": "KiemTraKhoangTrongIDGiaoDich",
+  "rule_type": "DATA_CONTINUITY_INTEGRITY",
+  "description": "Đảm bảo ID giao dịch liên tục cho mỗi chi nhánh, không có khoảng trống.",
+  "pointer": "bank_data.transactions.transaction_id",
+  "partition_by_column": "branch_id",
+  "order_by_column": "transaction_id",
+  "sequence_step_size": 1,
+  "function_keywords": ["LAG", "LEAD"]
+}

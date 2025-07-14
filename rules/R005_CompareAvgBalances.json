@@ -1,0 +1,16 @@
+{
+  "rule_id": "R005_CompareAvgBalances",
+  "rule_name": "SoSanhTrungBinhSoDuTietKiemVsVangLai",
+  "rule_type": "COMPARISON_DIFFERENT_GROUPS_STATISTICAL",
+  "description": "Kiểm tra trung bình số dư tài khoản tiết kiệm có lớn hơn 120% trung bình số dư tài khoản vãng lai.",
+  "group_1_calculation": {
+    "pointer": "bank_data.savings_accounts.balance",
+    "function_keyword": "AVG"
+  },
+  "group_2_calculation": {
+    "pointer": "bank_data.current_accounts.balance",
+    "function_keyword": "AVG"
+  },
+  "comparison_operator": ">",
+  "multiplier_value": 1.2
+}

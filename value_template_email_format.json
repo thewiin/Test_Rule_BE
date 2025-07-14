@@ -1,0 +1,9 @@
+{
+  "rule_id": "R002_EmailFormat",
+  "rule_name": "KiemTraDinhDangEmail",
+  "rule_type": "VALUE_TEMPLATE",
+  "description": "Kiểm tra định dạng email của khách hàng phải hợp lệ.",
+  "pointer": "customer_data.customers.email",
+  "template_regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+  "function_keyword": "REGEXP_LIKE"
+}

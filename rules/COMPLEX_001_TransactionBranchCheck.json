@@ -1,0 +1,43 @@
+{
+  "complex_rule_id": "COMPLEX_001_TransactionBranchCheck",
+  "complex_rule_name": "KiemTraGiaoDichChiNhanhPhucTap",
+  "rule_type": "COMPLEX_BOOLEAN_RULE",
+  "description": "Kiểm tra tổng giao dịch ghi nợ hàng ngày của chi nhánh và số lượng giao dịch ghi nợ.",
+  "boolean_expression": "RULE_A AND RULE_B",
+  "sub_rules_definitions": [
+    {
+      "rule_id": "RULE_A",
+      "rule_name": "TotalDailyDebitAmountCheck",
+      "rule_type": "COMPARISON_SAME_GROUPS_STATISTICAL",
+      "target_table": "bank_data.transactions",
+      "group_by_columns": [
+        "transaction_date",
+        "branch_id"
+      ],
+      "filter_condition": "transaction_type = 'DEBIT'",
+      "calculation": {
+        "function_keyword": "SUM",
+        "target_column": "amount"
+      },
+      "comparison_operator": ">",
+      "threshold_value": 500000000
+    },
+    {
+      "rule_id": "RULE_B",
+      "rule_name": "DailyDebitCountCheck",
+      "rule_type": "COMPARISON_SAME_GROUPS_STATISTICAL",
+      "target_table": "bank_data.transactions",
+      "group_by_columns": [
+        "transaction_date",
+        "branch_id"
+      ],
+      "filter_condition": "transaction_type = 'DEBIT'",
+      "calculation": {
+        "function_keyword": "COUNT",
+        "target_column": "transaction_id"
+      },
+      "comparison_operator": ">",
+      "threshold_value": 100
+    }
+  ]
+}
