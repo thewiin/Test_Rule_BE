@@ -1,0 +1,13 @@
+{
+  "rule_id": "R003_TransactionIDGap",
+  "rule_name": "CheckTransactionIDContinuity",
+  "rule_type": "DATA_CONTINUITY_INTEGRITY",
+  "description": "Ensures transaction IDs are continuous for each branch.",
+  "pointer": "bank_data.transactions.transaction_id",
+  "partition_by_column": "branch_id",
+  "order_by_column": "transaction_date",
+  "select_columns": [
+    "customer_id",
+    "amount"
+  ]
+}

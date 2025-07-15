@@ -30,6 +30,7 @@ s3transfer==0.13.0
 six==1.17.0
 sql-generator==0.2.0
 SQLAlchemy==2.0.41
+-e git+https://github.com/HadesThien/Test_Rule_Engine.git@c4a3d0bab51fd78a9e4b46d6d0066f2130b1a05d#egg=test_rule_engine
 typing_extensions==4.14.1
 tzdata==2025.2
 urllib3==1.26.20

@@ -1,0 +1,27 @@
+{
+  "rule_id": "R004_SameBranchCode",
+  "rule_name": "Direct comparison of branch codes",
+  "description": "Ensures the branch code in table A matches the branch code in table B for each customer.",
+  "rule_type": "COMPARISON_SAME_GROUPS_STATISTICAL",
+  "comparison_operator": "=",
+  "keyword": "",
+  "join_columns": [
+    "customer_id"
+  ],
+  "pointers_1": {
+    "table": "core.table_a",
+    "columns": [
+      "branch_code"
+    ]
+  },
+  "pointers_2": {
+    "table": "staging.table_b",
+    "columns": [
+      "branch_code"
+    ]
+  },
+  "select_columns": [
+    "customer_name",
+    "account_type"
+  ]
+}

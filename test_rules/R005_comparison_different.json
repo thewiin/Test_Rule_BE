@@ -1,0 +1,31 @@
+{
+  "rule_id": "R005_LoanRepaymentSummary",
+  "rule_name": "Validate Loan Repayment Totals per Contract",
+  "description": "The sum of all overdue payment components must equal the total repayment amount.",
+  "rule_type": "COMPARISON_DIFFERENT_GROUPS_STATISTICAL",
+  "comparison_operator": "=",
+  "join_columns": [
+    "contract_nbr"
+  ],
+  "calculation_1": {
+    "table": "loans.overdue_loan_payments",
+    "columns": [
+      "Overdue_Principal_Payment",
+      "Overdue_Principal_Penalty",
+      "Overdue_Interest_Payment",
+      "Overdue_Interest_Penalty"
+    ],
+    "keyword": "SUM"
+  },
+  "calculation_2": {
+    "table": "transactions.transaction_summary",
+    "columns": [
+      "repayment_amount"
+    ],
+    "keyword": ""
+  },
+  "select_columns": [
+    "customer_name",
+    "loan_type"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "rule_id": "R002_EmailFormat",
+  "rule_name": "CheckEmailFormat",
+  "rule_type": "VALUE_TEMPLATE",
+  "description": "Checks if the customer email format is valid.",
+  "pointer": "customer_data.customers.email",
+  "template_regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+  "calculation": {
+    "keyword": "REGEXP_LIKE"
+  },
+  "select_columns": [
+    "customer_id"
+  ]
+}

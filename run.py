@@ -22,9 +22,10 @@ def get_rule_schema(rule_type):
                 "description": {"type": "string"},
                 "pointer": {"type": "string"},
                 "min_value": {"type": "number"},
-                "max_value": {"type": "number"}
+                "max_value": {"type": "number"},
+                "select_columns": {"type": "array", "items": {"type": "string"}}
             },
-            "required": ["rule_id", "rule_name", "rule_type", "pointer", "min_value", "max_value"]
+            "required": ["rule_id", "rule_name", "rule_type", "description", "pointer", "min_value", "max_value"]
         },
         "VALUE_TEMPLATE": {
             "type": "object",
@@ -35,9 +36,14 @@ def get_rule_schema(rule_type):
                 "description": {"type": "string"},
                 "pointer": {"type": "string"},
                 "template_regex": {"type": "string"},
-                "function_keyword": {"type": "string"}
+                "calculation": {
+                    "type": "object",
+                    "properties": {"keyword": {"type": "string"}},
+                    "required": ["keyword"]
+                },
+                "select_columns": {"type": "array", "items": {"type": "string"}}
             },
-            "required": ["rule_id", "rule_name", "rule_type", "pointer", "template_regex", "function_keyword"]
+            "required": ["rule_id", "rule_name", "rule_type", "description", "pointer", "template_regex", "calculation"]
         },
         "DATA_CONTINUITY_INTEGRITY": {
             "type": "object",
@@ -49,10 +55,9 @@ def get_rule_schema(rule_type):
                 "pointer": {"type": "string"},
                 "partition_by_column": {"type": "string"},
                 "order_by_column": {"type": "string"},
-                "sequence_step_size": {"type": "number"},
-                "function_keywords": {"type": "array", "items": {"type": "string"}}
+                "select_columns": {"type": "array", "items": {"type": "string"}}
             },
-            "required": ["rule_id", "rule_name", "rule_type", "pointer", "partition_by_column", "order_by_column", "sequence_step_size", "function_keywords"]
+            "required": ["rule_id", "rule_name", "rule_type", "description", "pointer", "partition_by_column", "order_by_column"]
         },
         "COMPARISON_SAME_GROUPS_STATISTICAL": {
             "type": "object",
@@ -61,23 +66,21 @@ def get_rule_schema(rule_type):
                 "rule_name": {"type": "string"},
                 "rule_type": {"type": "string"},
                 "description": {"type": "string"},
-                "target_table": {"type": "string"},
-                "group_by_columns": {"type": "array", "items": {"type": "string"}},
-                "group1_filter_condition": {"type": "string"},
-                "group1_calculation": {
+                "comparison_operator": {"type": "string"},
+                "join_columns": {"type": "array", "items": {"type": "string"}},
+                "pointers_1": {
                     "type": "object",
-                    "properties": {"function_keyword": {"type": "string"}, "target_column": {"type": "string"}},
-                    "required": ["function_keyword", "target_column"]
+                    "properties": {"table": {"type": "string"}, "columns": {"type": "array", "items": {"type": "string"}}},
+                    "required": ["table", "columns"]
                 },
-                "group2_filter_condition": {"type": "string"},
-                "group2_calculation": {
+                "pointers_2": {
                     "type": "object",
-                    "properties": {"function_keyword": {"type": "string"}, "target_column": {"type": "string"}},
-                    "required": ["function_keyword", "target_column"]
+                    "properties": {"table": {"type": "string"}, "columns": {"type": "array", "items": {"type": "string"}}},
+                    "required": ["table", "columns"]
                 },
-                "comparison_operator": {"type": "string"}
+                "select_columns": {"type": "array", "items": {"type": "string"}}
             },
-            "required": ["rule_id", "rule_name", "rule_type", "target_table", "group_by_columns", "group1_filter_condition", "group1_calculation", "group2_filter_condition", "group2_calculation", "comparison_operator"]
+            "required": ["rule_id", "rule_name", "rule_type", "description", "comparison_operator", "join_columns", "pointers_1", "pointers_2"]
         },
         "COMPARISON_DIFFERENT_GROUPS_STATISTICAL": {
             "type": "object",
@@ -86,26 +89,27 @@ def get_rule_schema(rule_type):
                 "rule_name": {"type": "string"},
                 "rule_type": {"type": "string"},
                 "description": {"type": "string"},
-                "group_1_calculation": {
-                    "type": "object",
-                    "properties": {"pointer": {"type": "string"}, "function_keyword": {"type": "string"}},
-                    "required": ["pointer", "function_keyword"]
-                },
-                "group_2_calculation": {
-                    "type": "object",
-                    "properties": {"pointer": {"type": "string"}, "function_keyword": {"type": "string"}},
-                    "required": ["pointer", "function_keyword"]
-                },
                 "comparison_operator": {"type": "string"},
-                "multiplier_value": {"type": "number"}
+                "join_columns": {"type": "array", "items": {"type": "string"}},
+                "calculation_1": {
+                    "type": "object",
+                    "properties": {"table": {"type": "string"}, "columns": {"type": "array", "items": {"type": "string"}}, "keyword": {"type": "string"}},
+                    "required": ["table", "columns"]
+                },
+                "calculation_2": {
+                    "type": "object",
+                    "properties": {"table": {"type": "string"}, "columns": {"type": "array", "items": {"type": "string"}}, "keyword": {"type": "string"}},
+                    "required": ["table", "columns"]
+                },
+                "select_columns": {"type": "array", "items": {"type": "string"}}
             },
-            "required": ["rule_id", "rule_name", "rule_type", "group_1_calculation", "group_2_calculation", "comparison_operator", "multiplier_value"]
+            "required": ["rule_id", "rule_name", "rule_type", "description", "comparison_operator", "join_columns", "calculation_1", "calculation_2"]
         },
         "COMPLEX_BOOLEAN_RULE": {
             "type": "object",
             "properties": {
-                "complex_rule_id": {"type": "string"},
-                "complex_rule_name": {"type": "string"},
+                "rule_id": {"type": "string"},
+                "rule_name": {"type": "string"},
                 "rule_type": {"type": "string"},
                 "description": {"type": "string"},
                 "boolean_expression": {"type": "string"},
@@ -117,25 +121,23 @@ def get_rule_schema(rule_type):
                             "rule_id": {"type": "string"},
                             "rule_name": {"type": "string"},
                             "rule_type": {"type": "string"},
-                            "target_table": {"type": "string"},
-                            "group_by_columns": {"type": "array", "items": {"type": "string"}},
-                            "filter_condition": {"type": "string"},
+                            "description": {"type": "string"},
+                            "pointer": {"type": "string"},
+                            "min_value": {"type": "number"},
+                            "max_value": {"type": "number"},
+                            "template_regex": {"type": "string"},
                             "calculation": {
                                 "type": "object",
-                                "properties": {"function_keyword": {"type": "string"},
-                                               "target_column": {"type": "string"}},
-                                "required": ["function_keyword", "target_column"]
-                            },
-                            "comparison_operator": {"type": "string"},
-                            "threshold_value": {"type": "number"}
+                                "properties": {"keyword": {"type": "string"}},
+                                "required": ["keyword"]
+                            }
                         },
-                        "required": ["rule_id", "rule_name", "rule_type", "target_table", "group_by_columns",
-                                     "filter_condition", "calculation", "comparison_operator", "threshold_value"]
+                        "required": ["rule_id", "rule_name", "rule_type", "description"]
                     }
-                }
+                },
+                "select_columns": {"type": "array", "items": {"type": "string"}}
             },
-            "required": ["complex_rule_id", "complex_rule_name", "rule_type", "boolean_expression",
-                         "sub_rules_definitions"]
+            "required": ["rule_id", "rule_name", "rule_type", "description", "boolean_expression", "sub_rules_definitions"]
         }
     }
     return schemas.get(rule_type, {})
@@ -163,7 +165,6 @@ def upload_rule():
         validate(instance=rule, schema=get_rule_schema(rule_type))  # Validate trước khi lưu
         rule_id = rule.get("rule_id", rule.get("complex_rule_id"))
         mock_rules[rule_id] = rule
-        # Lưu rule vào file JSON để mock
         create_sample_rule_file(rule_id, rule)
         return jsonify({"statusCode": 200, "body": {"rule": rule}})
     except Exception as e:
@@ -213,19 +214,22 @@ def check_glue_schema():
         if not rule:
             return jsonify({"status": "error", "message": "No request body provided"}), 400
 
-        # Kiểm tra pointer hoặc target_table
         pointer = rule.get("pointer")
-        target_table = rule.get("target_table")
+        target_table = rule.get("target_table") or (rule.get("pointers_1", {}).get("table") if rule.get("pointers_1") else None) or (rule.get("calculation_1", {}).get("table") if rule.get("calculation_1") else None)
         if not pointer and not target_table:
             return jsonify({"status": "error", "message": "Missing pointer or target_table"}), 400
 
-        table = pointer.split(".")[0] if pointer else target_table
-        if not re.match(r'^[a-zA-Z0-9_]+$', table):
+        table = pointer.split(".")[0] if pointer else target_table.split(".")[0] if target_table else None
+        if not table or not re.match(r'^[a-zA-Z0-9_]+$', table):
             return jsonify({"status": "error", "message": "Invalid table name format"}), 400
 
         mock_schemas = {
             "customer_data.customers": ["customer_id", "full_name", "age", "email"],
-            "bank_data.transactions": ["transaction_id", "branch_id", "transaction_date", "amount", "transaction_type"]
+            "bank_data.transactions": ["transaction_id", "branch_id", "transaction_date", "amount", "transaction_type"],
+            "core.table_a": ["branch_code", "customer_id"],
+            "staging.table_b": ["branch_code", "customer_id"],
+            "loans.overdue_loan_payments": ["Overdue_Principal_Payment", "Overdue_Principal_Penalty", "Overdue_Interest_Payment", "Overdue_Interest_Penalty", "contract_nbr"],
+            "transactions.transaction_summary": ["repayment_amount", "contract_nbr"]
         }
         available_columns = mock_schemas.get(table)
         if not available_columns:
@@ -263,7 +267,6 @@ def predict_eta():
         if row_count <= 0:
             return jsonify({"status": "error", "message": "row_count must be positive"}), 400
 
-        # Định nghĩa thời gian cơ bản cho mỗi rule type (giây cho 1 triệu dòng)
         base_times = {
             "VALUE_RANGE": 1.0,
             "VALUE_TEMPLATE": 1.5,
@@ -276,7 +279,6 @@ def predict_eta():
         if base_time is None:
             return jsonify({"status": "error", "message": f"Unsupported rule_type: {rule_type}"}), 400
 
-        # Tính ETA dựa trên row_count (tỷ lệ tuyến tính)
         eta = base_time * (row_count / 1000000)
         return jsonify({"eta": round(eta, 2)})
     except Exception as e:
@@ -290,14 +292,9 @@ def generate_sql():
         if not rule or "rule_type" not in rule:
             return jsonify({"status": "error", "message": "Missing rule_type"}), 400
 
-        # Tạo file tạm để lưu rule và sử dụng parse_rule_from_file
         rule_id = rule.get("rule_id", rule.get("complex_rule_id", "temp_rule"))
         rule_path = create_sample_rule_file(rule_id, rule)
-
-        # Parse rule từ file
         parsed_rule = engine.parser.parse_rule_from_file(rule_path)
-
-        # Generate SQL bằng SqlGenerator
         sql = engine.generator.generate_sql(parsed_rule)
         return jsonify(sql)
     except ValueError as ve:
@@ -320,8 +317,7 @@ def execute_sql():
             return jsonify({"status": "error", "message": "SQL query is empty"}), 400
 
         rule = data.get("rule", {})
-        # Mock logic để đếm violations (không có database)
-        violations = 1 if "WHERE" in sql else 0  # Giả lập số vi phạm đơn giản
+        violations = 1 if "WHERE" in sql else 0  # Mock logic
         return jsonify([{"violation": True} for _ in range(violations)])
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -339,7 +335,6 @@ def determine_result():
         if not isinstance(violation_count, (int, float)) or not isinstance(threshold, (int, float)):
             return jsonify({"status": "error", "message": "violation_count and threshold must be numbers"}), 400
 
-        # Đánh giá kết quả trực tiếp dựa trên điều kiện
         result = "PASS" if violation_count <= threshold else "FAIL"
         return jsonify({"result": result})
     except Exception as e:
@@ -358,7 +353,6 @@ def log_result():
         if not isinstance(key, str) or not result:
             return jsonify({"status": "error", "message": "Invalid key or result format"}), 400
 
-        # Mock lưu vào bộ nhớ
         mock_results[key] = result
         return jsonify({"status": "success"})
     except Exception as e:
@@ -375,14 +369,13 @@ def get_result():
         if rule_id not in mock_rules:
             return jsonify({"status": "error", "message": f"Rule with ID {rule_id} not found"}), 400
 
-        # Tìm key tương ứng (giả định key là rule_id)
         result_key = rule_id
-        result = mock_results.get(result_key, "FAIL")  # Mặc định FAIL nếu chưa có
-        violations = 2 if result == "FAIL" else 0  # Mặc định 2 vi phạm nếu FAIL
+        result = mock_results.get(result_key, "FAIL")
+        violations = 2 if result == "FAIL" else 0
 
         return jsonify({
             "status": result,
-            "time": 5,  # Mặc định 5 giây
+            "time": 5,
             "violations": violations,
             "download_link": f"http://localhost:5000/results/{rule_id}"
         })
