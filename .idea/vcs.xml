@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Test_Rule_Engine" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/data/berka-dataset" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/loan-default-prediction" vcs="Git" />
   </component>
 </project>

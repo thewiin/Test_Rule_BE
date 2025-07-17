@@ -3,10 +3,10 @@ from flask import Flask, request, jsonify
 from jsonschema import validate
 import json
 from jinja2 import Template
-import re, os
-from datetime import datetime
+import re, os, psycopg2
 from Test_Accuracy_Rule_Engine import RuleEngine
 
+# Khởi tạo Flask và Engine
 engine = RuleEngine()
 app = Flask(__name__)
 
@@ -142,27 +142,25 @@ def get_rule_schema(rule_type):
     }
     return schemas.get(rule_type, {})
 
-# Mock app
 mock_rules = {}
 mock_results = {}
 
-# Helper function to create rule file (dựa trên test_rule_engine)
+# Create rule file
 def create_sample_rule_file(rule_name: str, content: dict):
-    """Helper function to create or update a JSON rule file for testing."""
     rules_dir = "rules"
     os.makedirs(rules_dir, exist_ok=True)
     rule_path = os.path.join(rules_dir, f"{rule_name}.json")
-    with open(rule_path, 'w', encoding='utf-8') as f:
+    with open(rule_path, "w", encoding="utf-8") as f:
         json.dump(content, f, indent=2, ensure_ascii=False)
     return rule_path
 
-# BE-01: Upload Rule
+# Upload Rule
 @app.route('/upload-rule', methods=['POST'])
 def upload_rule():
     try:
         rule = request.get_json()
         rule_type = rule.get("rule_type")
-        validate(instance=rule, schema=get_rule_schema(rule_type))  # Validate trước khi lưu
+        validate(instance=rule, schema=get_rule_schema(rule_type))
         rule_id = rule.get("rule_id", rule.get("complex_rule_id"))
         mock_rules[rule_id] = rule
         create_sample_rule_file(rule_id, rule)
@@ -170,76 +168,7 @@ def upload_rule():
     except Exception as e:
         return jsonify({"statusCode": 500, "error": str(e)}), 500
 
-# BE-02: Validate Rule
-@app.route('/validate-rule', methods=['POST'])
-def validate_rule():
-    try:
-        rule = request.get_json()
-        if not rule:
-            return jsonify({"status": "error", "message": "No request body provided"}), 400
-        if "rule_type" not in rule:
-            return jsonify({"status": "error", "message": "Missing rule_type"}), 400
-
-        rule_type = rule["rule_type"]
-        schema = get_rule_schema(rule_type)
-        if not schema:
-            return jsonify({"status": "error", "message": f"Unsupported rule_type: {rule_type}"}), 400
-
-        # Validate schema
-        validate(instance=rule, schema=schema)
-
-        # Kiểm tra sub_rules cho COMPLEX_BOOLEAN_RULE
-        if rule_type == "COMPLEX_BOOLEAN_RULE" and "sub_rules_definitions" in rule:
-            if not isinstance(rule["sub_rules_definitions"], list):
-                return jsonify({"status": "error", "message": "sub_rules_definitions must be an array"}), 400
-            for sub_rule in rule["sub_rules_definitions"]:
-                if not isinstance(sub_rule, dict):
-                    return jsonify({"status": "error", "message": "Each sub_rule must be an object"}), 400
-                sub_schema = get_rule_schema(sub_rule.get("rule_type"))
-                if not sub_schema:
-                    return jsonify({"status": "error", "message": f"Unsupported sub_rule_type: {sub_rule.get('rule_type')}"}), 400
-                validate(instance=sub_rule, schema=sub_schema)
-
-        return jsonify({"status": "valid"})
-    except ValidationError as ve:
-        return jsonify({"status": "error", "message": ve.message}), 400
-    except Exception as e:
-        return jsonify({"status": "error", "message": f"Internal error: {str(e)}"}), 500
-
-# BE-03: Check Glue Schema (Mock)
-@app.route('/check-glue-schema', methods=['POST'])
-def check_glue_schema():
-    try:
-        rule = request.get_json()
-        if not rule:
-            return jsonify({"status": "error", "message": "No request body provided"}), 400
-
-        pointer = rule.get("pointer")
-        target_table = rule.get("target_table") or (rule.get("pointers_1", {}).get("table") if rule.get("pointers_1") else None) or (rule.get("calculation_1", {}).get("table") if rule.get("calculation_1") else None)
-        if not pointer and not target_table:
-            return jsonify({"status": "error", "message": "Missing pointer or target_table"}), 400
-
-        table = pointer.split(".")[0] if pointer else target_table.split(".")[0] if target_table else None
-        if not table or not re.match(r'^[a-zA-Z0-9_]+$', table):
-            return jsonify({"status": "error", "message": "Invalid table name format"}), 400
-
-        mock_schemas = {
-            "customer_data.customers": ["customer_id", "full_name", "age", "email"],
-            "bank_data.transactions": ["transaction_id", "branch_id", "transaction_date", "amount", "transaction_type"],
-            "core.table_a": ["branch_code", "customer_id"],
-            "staging.table_b": ["branch_code", "customer_id"],
-            "loans.overdue_loan_payments": ["Overdue_Principal_Payment", "Overdue_Principal_Penalty", "Overdue_Interest_Payment", "Overdue_Interest_Penalty", "contract_nbr"],
-            "transactions.transaction_summary": ["repayment_amount", "contract_nbr"]
-        }
-        available_columns = mock_schemas.get(table)
-        if not available_columns:
-            return jsonify({"status": "error", "message": f"Table {table} not found in schema"}), 404
-
-        return jsonify({"status": "success", "available_columns": available_columns})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-# BE-04: Validate Response
+# Validate Response
 @app.route('/validate-response', methods=['GET'])
 def validate_response():
     rule_id = request.args.get('rule_id')
@@ -254,7 +183,7 @@ def validate_response():
         return jsonify({"status": "OK", "message": validation_message})
     return jsonify({"status": "Error", "message": f"Rule with ID {rule_id} not found"}), 400
 
-# BE-05: Predict ETA
+# Predict ETA
 @app.route('/predict-eta', methods=['POST'])
 def predict_eta():
     try:
@@ -284,7 +213,7 @@ def predict_eta():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# BE-06: Generate SQL
+# Generate SQL
 @app.route('/generate-sql', methods=['POST'])
 def generate_sql():
     try:
@@ -304,7 +233,7 @@ def generate_sql():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# BE-07: Execute SQL (Mock)
+# Execute SQL
 @app.route('/execute-sql', methods=['POST'])
 def execute_sql():
     try:
@@ -317,12 +246,12 @@ def execute_sql():
             return jsonify({"status": "error", "message": "SQL query is empty"}), 400
 
         rule = data.get("rule", {})
-        violations = 1 if "WHERE" in sql else 0  # Mock logic
+        violations = 1 if "WHERE" in sql else 0
         return jsonify([{"violation": True} for _ in range(violations)])
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# BE-08: Determine Result
+# Determine Result
 @app.route('/determine-result', methods=['POST'])
 def determine_result():
     try:
@@ -340,7 +269,7 @@ def determine_result():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# BE-09: Log Result (Mock S3)
+# Log Result
 @app.route('/log-result', methods=['POST'])
 def log_result():
     try:
@@ -358,7 +287,7 @@ def log_result():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# BE-10: Get Result
+# Get Result
 @app.route('/get-result', methods=['GET'])
 def get_result():
     try:
@@ -382,7 +311,7 @@ def get_result():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# BE-11: Load Function to Database
+# Load Function to Database
 @app.route('/load-function', methods=['POST'])
 def load_function():
     try:

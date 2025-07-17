@@ -1,0 +1,13 @@
+{
+  "rule_id": "R001_CustomerAgeRange",
+  "rule_name": "CheckCustomerAgeRange",
+  "rule_type": "VALUE_RANGE",
+  "description": "Checks if customer age is between 18 and 65.",
+  "pointer": "customer_data.customers.age",
+  "min_value": 18,
+  "max_value": 65,
+  "select_columns": [
+    "customer_id",
+    "full_name"
+  ]
+}
